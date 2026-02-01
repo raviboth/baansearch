@@ -1,0 +1,6 @@
+services:
+  baansearch:
+    image: ghcr.io/raviboth/baansearch:latest
+    restart: unless-stopped
+    ports:
+      - "8080:80"
