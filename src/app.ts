@@ -44,7 +44,7 @@ let locationInput: HTMLInputElement;
 let languageCheckboxes: HTMLInputElement[];
 let industryCheckboxes: HTMLInputElement[];
 let companySizeCheckboxes: HTMLInputElement[];
-let experienceRadios: HTMLInputElement[];
+let experienceCheckboxes: HTMLInputElement[];
 let remoteRadios: HTMLInputElement[];
 let timePostedSelect: HTMLSelectElement;
 let resultsContainer: HTMLElement;
@@ -206,7 +206,7 @@ function buildFilterUI(): void {
   companySizeCheckboxes = [];
   for (const size of COMPANY_SIZES) {
     const label = document.createElement('label');
-    label.className = 'checkbox-label';
+    label.className = 'checkbox-label company-size-label';
     label.title = size.range;
     const checkbox = document.createElement('input');
     checkbox.type = 'checkbox';
@@ -214,7 +214,16 @@ function buildFilterUI(): void {
     checkbox.value = size.value;
     checkbox.id = `size-${size.value}`;
     label.appendChild(checkbox);
-    label.appendChild(document.createTextNode(` ${size.label}`));
+    const textSpan = document.createElement('span');
+    textSpan.className = 'company-size-text';
+    textSpan.textContent = ` ${size.label}`;
+    label.appendChild(textSpan);
+    if (size.examples) {
+      const examplesSpan = document.createElement('span');
+      examplesSpan.className = 'company-size-examples';
+      examplesSpan.textContent = size.examples;
+      label.appendChild(examplesSpan);
+    }
     companySizeContainer.appendChild(label);
     companySizeCheckboxes.push(checkbox);
   }
@@ -222,33 +231,20 @@ function buildFilterUI(): void {
   // Experience level
   const experienceContainer = document.getElementById('experience-container') as HTMLElement;
   experienceContainer.innerHTML = '';
-  experienceRadios = [];
-  // Add "Any" option
-  const anyLabel = document.createElement('label');
-  anyLabel.className = 'radio-label';
-  const anyRadio = document.createElement('input');
-  anyRadio.type = 'radio';
-  anyRadio.name = 'experience';
-  anyRadio.value = '';
-  anyRadio.id = 'exp-any';
-  anyRadio.checked = true;
-  anyLabel.appendChild(anyRadio);
-  anyLabel.appendChild(document.createTextNode(' Any'));
-  experienceContainer.appendChild(anyLabel);
-  experienceRadios.push(anyRadio);
+  experienceCheckboxes = [];
 
   for (const exp of EXPERIENCE_LEVELS) {
     const label = document.createElement('label');
-    label.className = 'radio-label';
-    const radio = document.createElement('input');
-    radio.type = 'radio';
-    radio.name = 'experience';
-    radio.value = exp.value;
-    radio.id = `exp-${exp.value}`;
-    label.appendChild(radio);
+    label.className = 'checkbox-label';
+    const checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    checkbox.name = 'experience';
+    checkbox.value = exp.value;
+    checkbox.id = `exp-${exp.value}`;
+    label.appendChild(checkbox);
     label.appendChild(document.createTextNode(` ${exp.label}`));
     experienceContainer.appendChild(label);
-    experienceRadios.push(radio);
+    experienceCheckboxes.push(checkbox);
   }
 
   // Remote options
@@ -591,8 +587,8 @@ function populateFiltersFromState(): void {
   }
 
   // Experience
-  for (const radio of experienceRadios) {
-    radio.checked = radio.value === currentFilters.experience;
+  for (const cb of experienceCheckboxes) {
+    cb.checked = currentFilters.experience.includes(cb.value as ExperienceLevel);
   }
 
   // Remote
@@ -665,7 +661,7 @@ export function collectFiltersFromUI(): FilterState {
     industry,
     excludeIndustries,
     companySize: companySizeCheckboxes.filter(cb => cb.checked).map(cb => cb.value) as CompanySize[],
-    experience: (experienceRadios.find(r => r.checked)?.value || '') as ExperienceLevel,
+    experience: experienceCheckboxes.filter(cb => cb.checked).map(cb => cb.value) as ExperienceLevel[],
     remote: (remoteRadios.find(r => r.checked)?.value || '') as RemoteOption,
     timePosted: (timePostedSelect.value || 'any') as TimePosted,
   };
@@ -715,8 +711,8 @@ function setupEventListeners(): void {
   for (const cb of companySizeCheckboxes) {
     cb.addEventListener('change', filterChangeHandler);
   }
-  for (const radio of experienceRadios) {
-    radio.addEventListener('change', filterChangeHandler);
+  for (const cb of experienceCheckboxes) {
+    cb.addEventListener('change', filterChangeHandler);
   }
   for (const radio of remoteRadios) {
     radio.addEventListener('change', filterChangeHandler);
@@ -980,12 +976,14 @@ function generateResults(): void {
 
     for (const board of boards) {
       const url = generatedUrls.get(board.id) || '#';
+      const faviconDomain = board.faviconDomain || getDomain(board.baseUrl);
       html += `
         <a href="${escapeHtml(url)}"
            target="_blank"
            rel="noopener noreferrer"
            class="result-link"
            data-board="${board.id}">
+          <img src="https://www.google.com/s2/favicons?domain=${encodeURIComponent(faviconDomain)}&sz=16" alt="" class="result-favicon" width="16" height="16" loading="lazy">
           <span class="result-name">${escapeHtml(board.name)}</span>
           <span class="result-arrow">→</span>
         </a>`;
@@ -1005,6 +1003,14 @@ function generateResults(): void {
 }
 
 // Utility functions
+function getDomain(url: string): string {
+  try {
+    return new URL(url).hostname;
+  } catch {
+    return '';
+  }
+}
+
 function escapeHtml(str: string): string {
   const div = document.createElement('div');
   div.textContent = str;

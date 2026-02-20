@@ -28,7 +28,7 @@ describe('DEFAULT_FILTER_STATE', () => {
   it('should have empty defaults for text fields', () => {
     expect(DEFAULT_FILTER_STATE.role).toBe('');
     expect(DEFAULT_FILTER_STATE.location).toBe('');
-    expect(DEFAULT_FILTER_STATE.experience).toBe('');
+    expect(DEFAULT_FILTER_STATE.experience).toEqual([]);
     expect(DEFAULT_FILTER_STATE.remote).toBe('');
   });
 

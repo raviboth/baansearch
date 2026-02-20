@@ -80,7 +80,7 @@ describe('URL Serialization', () => {
     });
 
     it('should serialize experience level', () => {
-      const filters: FilterState = { ...DEFAULT_FILTER_STATE, experience: 'senior' };
+      const filters: FilterState = { ...DEFAULT_FILTER_STATE, experience: ['senior'] };
       const result = serializeToUrl({ filters });
       expect(result).toContain('exp=senior');
     });
@@ -120,7 +120,7 @@ describe('URL Serialization', () => {
         industry: ['fintech'],
         excludeIndustries: [],
         companySize: ['large', 'enterprise'],
-        experience: 'mid',
+        experience: ['mid'],
         remote: 'hybrid',
         timePosted: 'past-24h',
       };
@@ -184,7 +184,7 @@ describe('URL Serialization', () => {
 
     it('should parse experience', () => {
       const result = parseFromUrl('?exp=senior');
-      expect(result?.filters.experience).toBe('senior');
+      expect(result?.filters.experience).toEqual(['senior']);
     });
 
     it('should parse remote option', () => {
@@ -221,7 +221,7 @@ describe('URL Serialization', () => {
         industry: ['ai-ml'],
         excludeIndustries: [],
         companySize: ['faang'],
-        experience: 'senior',
+        experience: ['senior'],
         remote: 'remote',
         timePosted: 'past-week',
       };
@@ -243,7 +243,7 @@ describe('URL Serialization', () => {
         industry: ['saas'],
         excludeIndustries: ['web3', 'gaming'],
         companySize: ['medium', 'large'],
-        experience: 'mid',
+        experience: ['mid'],
         remote: 'hybrid',
         timePosted: 'past-24h',
       };

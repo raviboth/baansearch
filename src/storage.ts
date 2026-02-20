@@ -110,7 +110,7 @@ export function importPresets(data: PresetExport, merge = true): { imported: num
       industry: Array.isArray(preset.filters.industry) ? preset.filters.industry : [],
       excludeIndustries: Array.isArray(preset.filters.excludeIndustries) ? preset.filters.excludeIndustries : [],
       companySize: Array.isArray(preset.filters.companySize) ? preset.filters.companySize : [],
-      experience: preset.filters.experience || '',
+      experience: Array.isArray(preset.filters.experience) ? preset.filters.experience : (preset.filters.experience ? [preset.filters.experience] : []),
       remote: preset.filters.remote || '',
       timePosted: preset.filters.timePosted || 'any',
     };
@@ -149,6 +149,7 @@ export function getLastFilters(): FilterState {
     industry: saved.industry || [],
     excludeIndustries: saved.excludeIndustries || [],
     companySize: saved.companySize || [],
+    experience: Array.isArray(saved.experience) ? saved.experience : (saved.experience ? [saved.experience] : []),
   };
 }
 
@@ -221,8 +222,8 @@ export function serializeToUrl(state: UrlState): string {
   if (state.filters.companySize.length > 0) {
     params.set('size', state.filters.companySize.join(','));
   }
-  if (state.filters.experience) {
-    params.set('exp', state.filters.experience);
+  if (state.filters.experience.length > 0) {
+    params.set('exp', state.filters.experience.join(','));
   }
   if (state.filters.remote) {
     params.set('remote', state.filters.remote);
@@ -256,7 +257,7 @@ export function parseFromUrl(search: string): UrlState | null {
     industry: params.get('ind')?.split(',').filter(Boolean) || [],
     excludeIndustries: params.get('exInd')?.split(',').filter(Boolean) || [],
     companySize: (params.get('size')?.split(',').filter(Boolean) || []) as FilterState['companySize'],
-    experience: (params.get('exp') || '') as FilterState['experience'],
+    experience: (params.get('exp')?.split(',').filter(Boolean) || []) as FilterState['experience'],
     remote: (params.get('remote') || '') as FilterState['remote'],
     timePosted: (params.get('time') || 'any') as FilterState['timePosted'],
   };
