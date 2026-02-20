@@ -149,13 +149,13 @@ describe('URL Generation - LinkedIn', () => {
   });
 
   it('should include experience filter for senior (Mid-Senior level)', () => {
-    const filters: FilterState = { ...DEFAULT_FILTER_STATE, experience: 'senior' };
+    const filters: FilterState = { ...DEFAULT_FILTER_STATE, experience: ['senior'] };
     const url = linkedin.buildUrl(filters);
     expect(url).toContain('f_E=4'); // 4 = Mid-Senior level
   });
 
   it('should include experience filter for director/executive', () => {
-    const filters: FilterState = { ...DEFAULT_FILTER_STATE, experience: 'director' };
+    const filters: FilterState = { ...DEFAULT_FILTER_STATE, experience: ['director'] };
     const url = linkedin.buildUrl(filters);
     expect(url).toContain('f_E=5'); // 5,6 = Director, Executive
   });

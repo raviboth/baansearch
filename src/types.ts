@@ -13,7 +13,7 @@ export interface FilterState {
   industry: string[];
   excludeIndustries: string[];
   companySize: CompanySize[];
-  experience: ExperienceLevel;
+  experience: ExperienceLevel[];
   remote: RemoteOption;
   timePosted: TimePosted;
 }
@@ -35,6 +35,7 @@ export interface JobBoard {
   supportsDateSort: boolean;
   supportsRemote: boolean;
   description?: string;
+  faviconDomain?: string;
 }
 
 export interface GeneratedLink {
@@ -73,6 +74,7 @@ export interface FilterOption {
 export interface CompanySizeOption extends FilterOption {
   value: CompanySize;
   range: string;
+  examples?: string;
 }
 
 // URL state for shareable links
@@ -100,7 +102,7 @@ export const DEFAULT_FILTER_STATE: FilterState = {
   industry: [],
   excludeIndustries: [],
   companySize: [],
-  experience: '',
+  experience: [],
   remote: '',
   timePosted: 'any',
 };
@@ -217,11 +219,11 @@ export const INDUSTRIES: FilterOption[] = [
 
 // Company sizes
 export const COMPANY_SIZES: CompanySizeOption[] = [
-  { value: 'small', label: 'Small', range: '1-50 employees' },
-  { value: 'medium', label: 'Medium', range: '51-200 employees' },
-  { value: 'large', label: 'Large', range: '201-1000 employees' },
-  { value: 'enterprise', label: 'Enterprise', range: '1000+ employees' },
-  { value: 'faang', label: 'FAANG / Big Tech', range: 'Top tech companies' },
+  { value: 'small', label: 'Small', range: '1-50 employees', examples: 'e.g., Basecamp, Fly.io, Render' },
+  { value: 'medium', label: 'Medium', range: '51-200 employees', examples: 'e.g., Notion, Figma, Vercel' },
+  { value: 'large', label: 'Large', range: '201-1000 employees', examples: 'e.g., Stripe, Datadog, Cloudflare' },
+  { value: 'enterprise', label: 'Enterprise', range: '1000+ employees', examples: 'e.g., IBM, Cisco, Oracle' },
+  { value: 'faang', label: 'FAANG / Big Tech', range: 'Top tech companies', examples: 'e.g., Google, Apple, Meta, Amazon' },
 ];
 
 // Experience levels

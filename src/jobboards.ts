@@ -166,9 +166,13 @@ function buildSearchQuery(filters: FilterState): string {
   }
 
   // Experience level with alternatives
-  if (filters.experience) {
-    const expTerms = EXPERIENCE_LEVEL_TERMS[filters.experience] || [filters.experience];
-    const quotedExp = expTerms.map(e => `"${e}"`);
+  if (filters.experience.length > 0) {
+    const allExpTerms: string[] = [];
+    for (const exp of filters.experience) {
+      const terms = EXPERIENCE_LEVEL_TERMS[exp] || [exp];
+      allExpTerms.push(...terms);
+    }
+    const quotedExp = allExpTerms.map(e => `"${e}"`);
     parts.push(`(${quotedExp.join(' OR ')})`);
   }
 
@@ -273,14 +277,18 @@ function buildSimpleQuery(filters: FilterState, includeRemote = false): string {
     parts.push(filters.role);
   }
 
-  if (filters.experience) {
-    const expMap: Record<string, string> = {
-      'entry': 'entry level junior',
-      'mid': 'mid level',
-      'senior': 'senior lead',
-      'director': 'director principal staff',
-    };
-    parts.push(expMap[filters.experience] || filters.experience);
+  if (filters.experience.length > 0) {
+    const expParts: string[] = [];
+    for (const exp of filters.experience) {
+      const expMap: Record<string, string> = {
+        'entry': 'entry level junior',
+        'mid': 'mid level',
+        'senior': 'senior lead',
+        'director': 'director principal staff',
+      };
+      expParts.push(expMap[exp] || exp);
+    }
+    parts.push(expParts.join(' '));
   }
 
   if (filters.languages.length > 0) {
@@ -423,6 +431,7 @@ export const JOB_BOARDS: JobBoard[] = [
     supportsDateSort: true,
     supportsRemote: true,
     description: 'Search Greenhouse ATS job boards',
+    faviconDomain: 'boards.greenhouse.io',
     buildUrl: (filters) => {
       const query = buildSearchQuery(filters);
       const location = buildLocationQuery(filters.location);
@@ -438,6 +447,7 @@ export const JOB_BOARDS: JobBoard[] = [
     supportsDateSort: true,
     supportsRemote: true,
     description: 'Search Lever ATS job boards',
+    faviconDomain: 'jobs.lever.co',
     buildUrl: (filters) => {
       const query = buildSearchQuery(filters);
       const location = buildLocationQuery(filters.location);
@@ -453,6 +463,7 @@ export const JOB_BOARDS: JobBoard[] = [
     supportsDateSort: true,
     supportsRemote: true,
     description: 'Search Ashby ATS job boards',
+    faviconDomain: 'jobs.ashbyhq.com',
     buildUrl: (filters) => {
       const query = buildSearchQuery(filters);
       const location = buildLocationQuery(filters.location);
@@ -468,6 +479,7 @@ export const JOB_BOARDS: JobBoard[] = [
     supportsDateSort: true,
     supportsRemote: true,
     description: 'Search Workday ATS job boards',
+    faviconDomain: 'myworkdayjobs.com',
     buildUrl: (filters) => {
       const query = buildSearchQuery(filters);
       const location = buildLocationQuery(filters.location);
@@ -483,6 +495,7 @@ export const JOB_BOARDS: JobBoard[] = [
     supportsDateSort: true,
     supportsRemote: true,
     description: 'Search BambooHR ATS job boards',
+    faviconDomain: 'bamboohr.com',
     buildUrl: (filters) => {
       const query = buildSearchQuery(filters);
       const location = buildLocationQuery(filters.location);
@@ -498,6 +511,7 @@ export const JOB_BOARDS: JobBoard[] = [
     supportsDateSort: true,
     supportsRemote: true,
     description: 'Search iCIMS ATS job boards',
+    faviconDomain: 'icims.com',
     buildUrl: (filters) => {
       const query = buildSearchQuery(filters);
       const location = buildLocationQuery(filters.location);
@@ -513,6 +527,7 @@ export const JOB_BOARDS: JobBoard[] = [
     supportsDateSort: true,
     supportsRemote: true,
     description: 'Search SmartRecruiters ATS',
+    faviconDomain: 'jobs.smartrecruiters.com',
     buildUrl: (filters) => {
       const query = buildSearchQuery(filters);
       const location = buildLocationQuery(filters.location);
@@ -528,6 +543,7 @@ export const JOB_BOARDS: JobBoard[] = [
     supportsDateSort: true,
     supportsRemote: true,
     description: 'Search Jobvite ATS',
+    faviconDomain: 'jobs.jobvite.com',
     buildUrl: (filters) => {
       const query = buildSearchQuery(filters);
       const location = buildLocationQuery(filters.location);
@@ -560,9 +576,11 @@ export const JOB_BOARDS: JobBoard[] = [
         params.set('f_TPR', timeFilter);
       }
 
-      const expFilter = getLinkedInExperience(filters.experience);
-      if (expFilter) {
-        params.set('f_E', expFilter);
+      if (filters.experience.length > 0) {
+        const expCodes = filters.experience.map(e => getLinkedInExperience(e)).filter(Boolean);
+        if (expCodes.length > 0) {
+          params.set('f_E', expCodes.join(','));
+        }
       }
 
       const remoteFilter = getLinkedInRemote(filters.remote);
@@ -605,9 +623,11 @@ export const JOB_BOARDS: JobBoard[] = [
         params.set('remotejob', '1');
       }
 
-      const expFilter = getIndeedExperience(filters.experience);
-      if (expFilter) {
-        params.set('explvl', expFilter);
+      if (filters.experience.length > 0) {
+        const expFilter = getIndeedExperience(filters.experience[0]);
+        if (expFilter) {
+          params.set('explvl', expFilter);
+        }
       }
 
       return `https://www.indeed.com/jobs?${params.toString()}`;
@@ -879,6 +899,7 @@ export const JOB_BOARDS: JobBoard[] = [
     supportsDateSort: true,
     supportsRemote: false,
     description: 'TechCrunch job listings',
+    faviconDomain: 'techcrunch.com',
     buildUrl: (filters) => {
       const query = buildSearchQuery(filters);
       const location = buildLocationQuery(filters.location);
@@ -1308,6 +1329,7 @@ export const JOB_BOARDS: JobBoard[] = [
     supportsDateSort: true,
     supportsRemote: true,
     description: 'Google job listings',
+    faviconDomain: 'careers.google.com',
     buildUrl: (filters) => {
       const query = buildSearchQuery(filters);
       const location = buildLocationQuery(filters.location);
